@@ -4,9 +4,15 @@ const {
 } = require('apollo-server')
 const {
   sellingProperties: sellingPropertiesData,
+  sellingListData,
 } = require('./__mocks/common-mocks')
+
+const DataHandler = require('./functions/DataHandler')
+const getSellingListByAddress = require('./functions/getSellingListByAddress')
+const getSellingListByLatLngRange = require('./functions/getSellingListByLatLngRange')
+
 const fs = require('fs')
-const maskMapPoints = JSON.parse(fs.readFileSync('src/ApolloServer/__mocks/mask-map-points.json'))
+const maskMapPointsData = JSON.parse(fs.readFileSync('src/ApolloServer/__mocks/mask-map-points.json'))
 
 const typeDefs = gql`
   type SingleSellingProperty {
@@ -25,10 +31,14 @@ const typeDefs = gql`
     town: String
     cunli: String
     service_periods: String
+    lat: Float
+    lng: Float
   }
 
   type Query {
     sellingProperties(county: String): [SingleSellingProperty]
+    sellingListByAddress(address: String!): [SingleSellingProperty]
+    sellingListByLatLng(lat: Float!, lng: Float!, range: Float): [SingleSellingProperty]
   }
 `
 
@@ -40,19 +50,34 @@ const resolvers = {
       } = args
 
       if(county) {
-        return sellingPropertiesData.filter(p => {
+        return context.sellingList.filter(p => {
           return p.county.includes(county)
         })
       } else {
         return []
       }
     },
+
+    sellingListByAddress: (parent, args, context, info) => {
+      const {
+        address,
+      } = args
+
+      return getSellingListByAddress(address, context.sellingList)
+    },
+
+    sellingListByLatLng: (parent, args, context, info) => {
+      return getSellingListByLatLngRange(args, context.sellingList)
+    }
   }
 }
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: () => ({
+    sellingList: DataHandler.formatData(maskMapPointsData)
+  })
 })
 
 server.listen().then(({ url }) => {

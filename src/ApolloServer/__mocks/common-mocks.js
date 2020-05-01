@@ -32,6 +32,14 @@ const singleSelling = {
   }
 }
 
+const sellingListData = {
+  type: "FeatureCollection",
+  features: [
+    singleSelling
+  ]
+}
+
 module.exports = {
-  sellingProperties
+  sellingProperties,
+  sellingListData,
 }
