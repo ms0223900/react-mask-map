@@ -1,7 +1,10 @@
 declare module "@mask-map" {
-  type LatLng = [number, number]
+  interface LatLng {
+    lat: number
+    lng: number
+  }
   
-  interface SingleSellingProperty {
+  interface SingleSellingPoint extends LatLng {
     id: string
     name: string
     phone: string
@@ -17,14 +20,5 @@ declare module "@mask-map" {
     town: string
     cunli: string
     service_periods: string
-  }
-
-  interface SingleFeatureData {
-    type: string
-    properties: SingleSellingProperty
-    geometry: {
-      type: string
-      coordinates: LatLng
-    }
   }
 }
